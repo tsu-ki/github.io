@@ -3,21 +3,45 @@
 
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% if page.title %}{{ page.title | escape }} | {{ site.title | escape }}{% else %}{{ site.title | escape }}{%
         endif %}</title>
     <meta name="description"
         content="{{ page.excerpt | default: site.description | strip_html | normalize_whitespace | truncate: 160 | escape }}">
+
     <link rel="stylesheet" href="{{ '/assets/main.css' | relative_url }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
-    <main class="page-content">
-        <div class="wrapper">
+    <div class="wrapper">
+        <header class="site-header">
+            <nav class="site-nav">
+                <a href="{{ '/' | relative_url }}"><span class="bracket">[</span>h<span class="bracket">]</span>
+                    home</a>
+                <a href="{{ '/blog' | relative_url }}"><span class="bracket">[</span>b<span class="bracket">]</span>
+                    blog</a>
+                <a href="{{ '/projects' | relative_url }}"><span class="bracket">[</span>p<span class="bracket">]</span>
+                    projects</a>
+            </nav>
+        </header>
+
+        <main class="page-content">
             {{ content }}
-        </div>
-    </main>
+        </main>
+
+        <footer class="site-footer">
+            <div class="footer-links">
+                <a href="https://x.com/sushisrotten">twitter</a>
+                <a href="https://github.com/tsu-ki">github</a>
+                <a href="https://www.linkedin.com/in/krishnahere">linkedin</a>
+            </div>
+        </footer>
+    </div>
 </body>
 
 </html>

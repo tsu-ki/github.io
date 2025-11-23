@@ -1,137 +1,182 @@
---- ---
+---
+---
 
-/* Reset and Base Styles */
-* {
+/* Reset & Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
-/* Variables */
 :root {
-  --bg-color: #111111;
-  --text-color: #d1d5db;
-  --heading-color: #ffffff;
-  --link-color: #d1d5db;
-  --link-underline: #525252;
-  --link-hover: #ffffff;
-  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  /* Colors */
+  --bg-color: #0a0a0a;       /* Deep Black */
+  --text-color: #a1a1aa;     /* Zinc 400 */
+  --heading-color: #ededed;  /* Zinc 100 */
+  --accent-color: #f97316;   /* Orange */
+  --nav-color: #d4d4d8;      /* Zinc 300 */
+  --bracket-color: #525252;  /* Zinc 600 */
+  --code-bg: #171717;        /* Neutral 900 */
+  --border-color: #262626;   /* Neutral 800 */
+
+  /* Fonts */
+  --font-sans: "Google Sans Code", monospace;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
-/* Body */
 body {
   background-color: var(--bg-color);
   color: var(--text-color);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.75;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Layout */
-.page-content {
-  padding: 2rem 0;
-}
-
 .wrapper {
-  max-width: 42rem;
+  max-width: 60rem;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 4rem 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Typography */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+.page-content {
+  flex: 1;
+}
+
+/* Header & Nav */
+.site-header {
+  margin-bottom: 5rem;
+}
+
+.site-nav {
+  display: flex;
+  gap: 1.5rem;
   font-family: var(--font-mono);
-  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.site-nav a {
+  color: var(--nav-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-nav a:hover {
+  color: var(--accent-color);
+}
+
+.bracket {
+  color: var(--bracket-color);
+}
+
+/* Typography Elements */
+h1, h2, h3, h4 {
   color: var(--heading-color);
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
   line-height: 1.3;
+  margin-top: 3rem;
+  margin-bottom: 1.2rem;
+  letter-spacing: -0.02em;
 }
 
-h1 {
-  font-size: 1.75rem;
-}
-
-h2 {
-  font-size: 1.5rem;
-}
-
-h3 {
-  font-size: 1.25rem;
-}
+h1 { font-size: 2rem; margin-top: 0; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
 
 p {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-/* Post Title with Asterisk */
-.post-title::before {
+/* Orange Asterisk Title */
+.asterisk::before {
   content: "* ";
-  color: var(--heading-color);
+  color: var(--accent-color);
+  margin-right: 0.2rem;
 }
 
-/* Links */
+/* Post Meta (Date) */
+.post-meta {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: #525252;
+  margin-bottom: 3rem;
+}
+
+/* General Links */
 a {
-  color: var(--link-color);
-  text-decoration: underline;
-  text-decoration-color: var(--link-underline);
-  text-underline-offset: 4px;
-  transition: all 0.2s ease;
+  color: var(--heading-color);
+  text-decoration: none; /* No underline */
+  transition: color 0.2s ease;
 }
 
 a:hover {
-  color: var(--link-hover);
-  text-decoration-color: var(--link-hover);
-}
-
-a:visited {
-  color: var(--link-color);
+  color: var(--accent-color);
 }
 
 /* Code Blocks */
-code {
+pre, code {
   font-family: var(--font-mono);
-  background-color: rgba(255, 255, 255, 0.05);
-  padding: 0.2em 0.4em;
-  border-radius: 3px;
   font-size: 0.9em;
 }
 
-pre {
-  background-color: rgba(255, 255, 255, 0.05);
-  padding: 1rem;
+code {
+  background-color: rgba(255,255,255,0.05);
+  padding: 0.2em 0.4em;
   border-radius: 4px;
+  color: #e5e5e5;
+}
+
+pre {
+  background-color: var(--code-bg);
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  border-radius: 8px;
   overflow-x: auto;
-  margin-bottom: 1rem;
+  margin: 2rem 0;
 }
 
 pre code {
   background: none;
   padding: 0;
+  color: inherit;
 }
 
 /* Lists */
-ul,
-ol {
-  margin-left: 1.5rem;
-  margin-bottom: 1rem;
+ul, ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
 }
 
 li {
   margin-bottom: 0.5rem;
+  padding-left: 0.5rem;
 }
 
-/* Post List (for home page) */
+li::marker {
+  color: var(--bracket-color);
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin: 2rem 0;
+  display: block;
+}
+
+/* Home Page Post List */
 .post-list {
   list-style: none;
-  margin-left: 0;
+  padding: 0;
   margin-top: 2rem;
 }
 
@@ -139,69 +184,68 @@ li {
   margin-bottom: 1rem;
 }
 
-/* Blockquotes */
-blockquote {
-  border-left: 3px solid var(--link-underline);
-  padding-left: 1rem;
-  margin: 1rem 0;
-  font-style: italic;
-  color: #9ca3af;
-}
-
-/* Post Content */
-.post-content {
-  margin-top: 2rem;
-}
-
-/* Tables */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-}
-
-th,
-td {
-  padding: 0.5rem;
-  text-align: left;
-  border-bottom: 1px solid var(--link-underline);
-}
-
-th {
+/* Blog hyperlinks styling */
+.post-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
   color: var(--heading-color);
-  font-weight: 700;
+  font-family: var(--font-mono); /* Force Mono for list */
+  text-decoration: none;
+  width: 100%;
 }
 
-/* Images */
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 1rem 0;
+.post-link:hover {
+  color: var(--accent-color); /* Orange hover */
 }
 
-/* Horizontal Rule */
-hr {
-  border: none;
-  border-top: 1px solid var(--link-underline);
-  margin: 2rem 0;
+.post-date {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: #525252;
+  white-space: nowrap;
+  margin-left: 2rem;
 }
 
-/* Responsive adjustments */
+/* Footer */
+.site-footer {
+  margin-top: 6rem;
+  padding-top: 2rem;
+  border-top: 1px dashed var(--border-color);
+}
+
+.footer-links {
+  display: flex;
+  gap: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+.footer-links a {
+  color: var(--text-color);
+}
+
+.footer-links a:hover {
+  color: var(--accent-color);
+}
+
+/* Responsive */
 @media screen and (max-width: 768px) {
-  body {
-    font-size: 15px;
-  }
-
-  h1 {
-    font-size: 1.5rem;
-  }
-
-  h2 {
-    font-size: 1.25rem;
-  }
-
   .wrapper {
-    padding: 0 1rem;
+    padding: 2rem 1rem;
+    max-width: 100%;
+  }
+
+  h1 { font-size: 1.75rem; }
+
+  .post-link {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .post-date {
+    margin-left: 0;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
   }
 }

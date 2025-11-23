@@ -263,27 +263,6 @@ But we also save everything you save: Twitter bookmarks, websites, PDFs, images,
 
 The combination is very powerful. Your profile understands you and your saved content provides the facts and information you care about. Together they deliver personalized, informed responses.
 
-## Integration
-
-```ts
-import { generateText } from "ai";
-import { withSupermemory } from "@supermemory/tools/ai-sdk";
-import { openai } from "@ai-sdk/openai";
-
-// Wrap your model with Supermemory - profiles are automatically injected
-const modelWithMemory = withSupermemory(openai("gpt-4"), "user-123");
-
-const result = await generateText({
-  model: modelWithMemory,
-  messages: [{ role: "user", content: "What do you know about me?" }],
-});
-// The model automatically has the user's profile context!
-```
-
-That's it. Your agent now understands users by default.
-
-We're running this in production now with multiple enterprise customers, edge-deployed on Cloudflare's infrastructure.
-
 ## Conclusion
 
 So is RAG really dead?
