@@ -1,46 +1,33 @@
 ---
 layout: post
-title: "RAG is DEAD"
-date: 2025-11-15
+title: "RAG is Dead"
+date: 2025-11-20
 ---
-
-[h] home
-
-[b] blog
-
-[p] projects
-
-\*RAG is Dead
-
-November 20, 2025
 
 The title is provocative, I know. But RAG as it was originally conceived, stateless similarity matching over vector embeddings, has fundamental limitations that no amount of optimization can fix.
 
-Working at Supermemory, I've spent the last few months building and thinking deeply about what comes after RAG. Here are my thoughts.
 
-What is RAG, Really?
+## What is RAG, Really?
 
 The RAG pipeline is straightforward:
 
+```text
 Query → Embedding → Vector Search → Top-K Results → LLM
+```
 
 You chunk your data, generate embeddings (typically using models like OpenAI's text-embedding-3 or open-source alternatives like BGE), store them in a vector database (Pinecone, Weaviate, Qdrant, whatever), and at query time, you:
 
-Embed the user's query
+1. Embed the user's query
+2. Run cosine similarity (or dot product, depending on your normalization) against your vector store
+3. Retrieve the top-k most similar chunks
+4. Stuff them into the LLM's context window
+5. Hope the LLM can synthesize a coherent answer
 
-Run cosine similarity (or dot product, depending on your normalization) against your vector store
+The key characteristic: **RAG is stateless**. Every query is independent. The system has no notion of who the user is, what they asked before, or how information relates over time. It's pure similarity matching.
 
-Retrieve the top-k most similar chunks
+## The Problems with RAG
 
-Stuff them into the LLM's context window
-
-Hope the LLM can synthesize a coherent answer
-
-The key characteristic: RAG is stateless. Every query is independent. The system has no notion of who the user is, what they asked before, or how information relates over time. It's pure similarity matching.
-
-The Problems with RAG
-
-1. No temporal awareness
+### 1. No temporal awareness
 
 RAG can't handle facts with validity windows. Consider this scenario:
 
@@ -48,59 +35,55 @@ User asks: "Do I have dental coverage?" on January 5, 2025
 
 Stored information:
 
-March 2024: "Added dental coverage to my insurance"
-
-October 2024: "Dental coverage ends December 31, 2024"
+- March 2024: "Added dental coverage to my insurance"
+- October 2024: "Dental coverage ends December 31, 2024"
 
 A RAG system retrieves both with similar cosine similarity scores. It sees "added dental coverage" and likely answers "Yes", which is now incorrect. The fact was true from March-December 2024, but is no longer valid. RAG has no concept of time-based fact validity.
 
-2. No entity relationships
+### 2. No entity relationships
 
 RAG does similarity matching, not relationship traversal. Consider: "Who do I know in Berlin that works in renewable energy?"
 
 Stored information:
 
-"Met Sarah at a conference, she works in solar power in Munich"
-
-"Sarah introduced me to Marcus who recently moved to Berlin"
-
-"Marcus works in wind energy development"
+- "Met Sarah at a conference, she works in solar power in Munich"
+- "Sarah introduced me to Marcus who recently moved to Berlin"
+- "Marcus works in wind energy development"
 
 RAG searches for "Berlin" AND "renewable energy" - the problem is these facts are in separate chunks. It might return Sarah (wrong city) or miss Marcus (if "wind energy" doesn't match "renewable energy" semantically enough). It can't follow the chain: You → Sarah → Marcus → Berlin + wind energy.
 
 This is fundamental. Vector similarity measures "semantic closeness" but not "how things relate through a knowledge graph."
 
-3. Stateless queries
+### 3. Stateless queries
 
 Every query starts from scratch. If you ask "What's my meeting about?" RAG doesn't know who "my" refers to. You need to embed user context in every single query or use filtering metadata, which is a band-aid solution.
 
-4. The k-parameter tuning nightmare
+### 4. The k-parameter tuning nightmare
 
 Retrieve top-5? Top-10? Top-20? Too few and you miss context. Too many and you pollute the context window with irrelevant chunks. This isn't a solvable optimization problem because the right k varies per query type.
 
-5. Context window costs
+### 5. Context window costs
 
 Even with 200K context windows, you're paying per token. Stuffing 50KB of retrieved chunks into every query gets expensive fast. And long context doesn't mean the model uses all of it effectively - attention still degrades over distance.
 
-Enter Memory Systems
+## Enter Memory Systems
 
 Memory systems use a different architecture:
 
+```text
 Query → Entity Recognition → Graph Traversal → Temporal Filtering → Context Assembly → LLM
+```
 
 Instead of vector similarity, memory systems build knowledge graphs where:
 
-Entities (users, preferences, events) are nodes
-
-Relationships between them are edges
-
-Each node has temporal metadata (created, updated, invalidated timestamps)
-
-The system is stateful - it knows who is asking and what their history is
+- Entities (users, preferences, events) are nodes
+- Relationships between them are edges
+- Each node has temporal metadata (created, updated, invalidated timestamps)
+- The system is stateful - it knows who is asking and what their history is
 
 This isn't just a different implementation detail. It's a fundamental shift from "find similar documents" to "traverse the user's knowledge graph and assemble relevant context based on entity relationships and temporal validity."
 
-How Memory Systems Actually Work
+## How Memory Systems Actually Work
 
 1. Entity recognition and container tagging
 
@@ -120,15 +103,11 @@ Instead of "find chunks similar to the query," memory systems ask "what entities
 
 The query process:
 
-Extract entities from the user's query
-
-Traverse the knowledge graph starting from those entities
-
-Follow relationship edges (e.g., "knows", "works_at", "caused_by", "related_to")
-
-Apply temporal filters and user scoping along the way
-
-Assemble context from the relevant subgraph
+- Extract entities from the user's query
+- Traverse the knowledge graph starting from those entities
+- Follow relationship edges (e.g., "knows", "works_at", "caused_by", "related_to")
+- Apply temporal filters and user scoping along the way
+- Assemble context from the relevant subgraph
 
 This enables multi-hop reasoning that vector similarity fundamentally can't do.
 
@@ -136,13 +115,11 @@ This enables multi-hop reasoning that vector similarity fundamentally can't do.
 
 Memory systems continuously update their understanding. When you add related memories, the system:
 
-Identifies connections between nodes
+- Identifies connections between nodes
+- Generates summaries of memory clusters
+- Updates relationship strengths based on co-occurrence
 
-Generates summaries of memory clusters
-
-Updates relationship strengths based on co-occurrence
-
-What This Unlocks
+## What This Unlocks
 
 Here are the specific technical capabilities that memory systems enable:
 
@@ -154,13 +131,10 @@ Example: Healthcare coverage: "Do I have dental coverage?"
 
 Timeline:
 
-Jan 2024: "Started new job, health insurance active"
-
-Mar 2024: "Added dental coverage"
-
-Oct 2024: "Dental coverage ends Dec 31"
-
-Jan 2025: User asking about dental
+- Jan 2024: "Started new job, health insurance active"
+- Mar 2024: "Added dental coverage"
+- Oct 2024: "Dental coverage ends Dec 31"
+- Jan 2025: User asking about dental
 
 RAG: Retrieves "Added dental coverage" and matches semantically. Returns yes, you have dental - which is now incorrect.
 
@@ -174,13 +148,10 @@ Example: Patient tracking: "My back still hurts, what should I try?"
 
 Timeline:
 
-Week 1: "Started taking ibuprofen for back pain"
-
-Week 2: "Ibuprofen is causing stomach issues"
-
-Week 3: "Switched to acetaminophen"
-
-Week 4: Now asking about pain management
+- Week 1: "Started taking ibuprofen for back pain"
+- Week 2: "Ibuprofen is causing stomach issues"
+- Week 3: "Switched to acetaminophen"
+- Week 4: Now asking about pain management
 
 RAG: Retrieves all medications mentioned (ibuprofen, acetaminophen) with similar relevance. Might suggest ibuprofen again since it matches "back pain" semantically.
 
@@ -194,11 +165,9 @@ Example: Dietary preferences: "Suggest a restaurant for dinner"
 
 Timeline:
 
-2020-2023: Multiple entries about enjoying steakhouses
-
-January 2024: "I'm going vegetarian"
-
-Now: Looking for restaurant
+- 2020-2023: Multiple entries about enjoying steakhouses
+- January 2024: "I'm going vegetarian"
+- Now: Looking for restaurant
 
 RAG: Both "I love steak" and "I'm vegetarian" get retrieved. The LLM has to parse natural language to understand one supersedes the other.
 
@@ -212,19 +181,16 @@ Example: Real estate: "Show me apartments in the city"
 
 Timeline:
 
-6 months ago: "I want a place with a home office and quiet neighbors"
-
-3 months ago: "We're expecting a baby"
-
-1 month ago: "Looking for good school districts"
-
-Now: Searching for apartments
+- 6 months ago: "I want a place with a home office and quiet neighbors"
+- 3 months ago: "We're expecting a baby"
+- 1 month ago: "Looking for good school districts"
+- Now: Searching for apartments
 
 RAG: Retrieves all apartment-related preferences. Might show downtown studios with home offices because they match "apartment" + "home office" semantically.
 
 Memory: Home office preference still exists but weighted lower than family-friendly + school district. Returns 2-3BR near schools, not studios.
 
-The Drawbacks of Traditional Memory Implementations
+## The Drawbacks of Traditional Memory Implementations
 
 The memory systems I've described - entity graphs, relationship traversal, temporal filtering, context rewriting - are powerful in theory. But implementing them at scale comes with serious challenges:
 
@@ -232,13 +198,10 @@ Query-time graph traversals are expensive. Every relationship you need to follow
 
 Entity extraction and relationship mapping is computationally intensive. Building knowledge graphs from unstructured text requires:
 
-NER (named entity recognition) on every piece of content
-
-Relationship extraction between entities
-
-Continuous graph updates as new information arrives
-
-Deduplication and entity resolution
+- NER (named entity recognition) on every piece of content
+- Relationship extraction between entities
+- Continuous graph updates as new information arrives
+- Deduplication and entity resolution
 
 Context rewriting happens asynchronously but still requires compute. Summarizing memory clusters, discovering connections, updating relationship strengths - all of this processing needs to happen somewhere, at some cost.
 
@@ -248,7 +211,7 @@ The result: Many theoretical memory system implementations either (a) have terri
 
 The concepts are sound. The naive implementation is a problem.
 
-Memory is NOT Just Retrieval
+## Memory is NOT Just Retrieval
 
 Here's what most people get wrong: they think memory is just better search. Smarter retrieval. More relevant results.
 
@@ -262,15 +225,11 @@ You ask your AI assistant: "I'm thinking about buying a house."
 
 You've never mentioned house hunting before. But the agent's default context already includes:
 
-Your income range (extracted from past financial discussions)
-
-Where you prefer to live (from conversations about neighborhoods, commute complaints)
-
-Your family situation (single, married, kids on the way)
-
-Your work setup (remote, hybrid, office based)
-
-Urban vs suburban preference (inferred from how you talk about weekends, activities)
+- Your income range (extracted from past financial discussions)
+- Where you prefer to live (from conversations about neighborhoods, commute complaints)
+- Your family situation (single, married, kids on the way)
+- Your work setup (remote, hybrid, office based)
+- Urban vs suburban preference (inferred from how you talk about weekends, activities)
 
 Traditional RAG has no default context. It searches for documents about "buying a house." Returns generic real estate advice or unrelated mentions of houses.
 
@@ -284,7 +243,7 @@ When retrieval is needed (looking up specific documents, detailed history, niche
 
 We extract facts from everything you interact with (conversations, saved content, connected data sources) and construct comprehensive profiles covering your preferences, behavioral patterns, context about your life, work, family, financial situation. This profile becomes the default context injected into every conversation, enabling the agent to understand you without searching.
 
-Facts-Based Architecture Under the Hood
+## Facts-Based Architecture Under the Hood
 
 We still build entity graphs and track relationships, but our underlying system uses facts that chain on top of facts instead of requiring expensive query-time graph traversals.
 
@@ -294,7 +253,7 @@ Our approach: Facts are pre-processed and chained during ingestion → Query com
 
 The result: All the power of entity graphs and relationships, none of the query-time latency. Sub-400ms p95 performance.
 
-Forgetfulness
+## Forgetfulness
 
 Not all facts matter equally. Our system learns what's important to you versus what's noise. Unimportant information naturally fades from the active profile, not deleted, but deprioritized. This keeps profiles relevant and prevents context pollution.
 
@@ -304,31 +263,28 @@ But we also save everything you save: Twitter bookmarks, websites, PDFs, images,
 
 The combination is very powerful. Your profile understands you and your saved content provides the facts and information you care about. Together they deliver personalized, informed responses.
 
-Integration
+## Integration
 
-import { generateText } from "ai"
+```ts
+import { generateText } from "ai";
+import { withSupermemory } from "@supermemory/tools/ai-sdk";
+import { openai } from "@ai-sdk/openai";
 
-import { withSupermemory } from "@supermemory/tools/ai-sdk"
-
-import { openai } from "@ai-sdk/openai"
-
-const modelWithMemory = withSupermemory(openai("gpt-4"), "user-123")
+// Wrap your model with Supermemory - profiles are automatically injected
+const modelWithMemory = withSupermemory(openai("gpt-4"), "user-123");
 
 const result = await generateText({
-
-model: modelWithMemory,
-
-messages: [{ role: "user", content: "What do you know about me?" }]
-
-})
-
+  model: modelWithMemory,
+  messages: [{ role: "user", content: "What do you know about me?" }],
+});
 // The model automatically has the user's profile context!
+```
 
 That's it. Your agent now understands users by default.
 
 We're running this in production now with multiple enterprise customers, edge-deployed on Cloudflare's infrastructure.
 
-Conclusion
+## Conclusion
 
 So is RAG really dead?
 

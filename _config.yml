@@ -1,3 +1,5 @@
-title: ""
-description: "Thoughts, notes, and experiments"
+title: "My Blog"
+description: "Technical writing and insights"
 theme: minima
+minima:
+  skin: dark
